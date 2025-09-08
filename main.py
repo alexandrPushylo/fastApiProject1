@@ -20,13 +20,13 @@ hotels = [
 
 @app.get("/hotels")
 def get_hotels(
-        id: int | None = Query(None, description="Hotel ID"),
+        hotel_id: int | None = Query(None, description="Hotel ID"),
         name: str | None = Query(None, description="Hotel Name"),
         title: str | None = Query(None, description="Hotel Title"),
 ):
     hotels_filtered = []
     for hotel in hotels:
-        if id and hotel['id'] != id:
+        if hotel_id and hotel['id'] != hotel_id:
             continue
         if name and hotel['name'] != name:
             continue
@@ -49,14 +49,30 @@ def create_hotel(
     return {"success": True}
 
 
-@app.delete("/hotels/{id}")
+@app.delete("/hotels/{hotel_id}")
 def delete_hotel(
-        id: int,
+        hotel_id: int,
 ):
     global hotels
-    hotels = [hotel for hotel in hotels if hotel['id'] != id]
+    hotels = [hotel for hotel in hotels if hotel['id'] != hotel_id]
 
     return {"success": True}
+
+
+@app.put("/hotels/{hotel_id}")
+def update_hotel(
+        hotel_id: int,
+        name: str = Body(),
+        title: str = Body(),
+):
+    global hotels
+    for hotel in hotels:
+        if hotel['id'] == hotel_id:
+            hotel['name'] = name
+            hotel['title'] = title
+
+    return {"success": True}
+
 
 
 
