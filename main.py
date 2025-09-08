@@ -49,6 +49,15 @@ def create_hotel(
     return {"success": True}
 
 
+@app.delete("/hotels/{id}")
+def delete_hotel(
+        id: int,
+):
+    global hotels
+    hotels = [hotel for hotel in hotels if hotel['id'] != id]
+
+    return {"success": True}
+
 
 
 if __name__ == '__main__':
