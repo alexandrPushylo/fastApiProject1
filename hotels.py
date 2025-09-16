@@ -5,6 +5,20 @@ from schemas.hotels import Hotel, HotelPATCH
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
+hotels = [
+    {
+        "id": 1,
+        "title": "Hotel 1",
+        "name": "Hotel 1",
+    },
+    {
+        "id": 2,
+        "title": "Hotel 2",
+        "name": "Hotel 2",
+    },
+]
+
+
 @router.get("", summary="Получить список отелей")
 def get_hotels(
         hotel_id: int | None = Query(None, description="Hotel ID"),
