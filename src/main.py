@@ -7,7 +7,6 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.hotels import router as hotels_router
-from src.config import settings
 
 
 app = FastAPI()
