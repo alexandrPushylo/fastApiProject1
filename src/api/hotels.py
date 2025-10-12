@@ -66,13 +66,13 @@ async def create_hotel(
 
 
 @router.delete("/{hotel_id}", summary="Удалить отель")
-def delete_hotel(
+async def delete_hotel(
         hotel_id: int,
 ):
-    global hotels
-    hotels = [hotel for hotel in hotels if hotel['id'] != hotel_id]
-
-    return {"success": True}
+    async with async_session_maker() as session:
+        await HotelsRepository(session).delete(id=hotel_id)
+        await session.commit()
+    return {"status": "OK"}
 
 
 @router.put("/{hotel_id}", summary="Обновить отель")
