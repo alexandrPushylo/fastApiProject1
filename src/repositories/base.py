@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
 
 class BaseRepository:
@@ -17,3 +17,10 @@ class BaseRepository:
         results = await self.session.execute(query)
         return results.scalars().one_or_none()
 
+    async def add(self, values):
+        # stmt = insert(self.model).values(values)
+        # result = await self.session.execute(stmt)
+        new_model = self.model(**values)
+        self.session.add(new_model)
+        await self.session.flush()
+        return new_model

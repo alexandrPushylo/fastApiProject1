@@ -60,11 +60,9 @@ async def create_hotel(
         })
 ):
     async with async_session_maker() as session:
-        create_hotel_stmt = insert(HotelsOrm).values(data.model_dump())
-        # print(create_hotel_stmt.compile(compile_kwargs={"literal_binds": True}))
-        await session.execute(create_hotel_stmt)
+        hotel = await HotelsRepository(session).add(data.model_dump())
         await session.commit()
-    return {"success": True}
+    return {"status": "OK", "data": hotel}
 
 
 @router.delete("/{hotel_id}", summary="Удалить отель")
