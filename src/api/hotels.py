@@ -76,17 +76,15 @@ def delete_hotel(
 
 
 @router.put("/{hotel_id}", summary="Обновить отель")
-def update_hotel(
+async def update_hotel(
         hotel_id: int,
         data: Hotel,
 ):
-    global hotels
-    for hotel in hotels:
-        if hotel['id'] == hotel_id:
-            hotel['name'] = data.name
-            hotel['title'] = data.title
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(data, id=hotel_id)
+        await session.commit()
 
-    return {"success": True}
+    return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}", summary="Частично обновить отель")
