@@ -10,18 +10,6 @@ from src.schemas.hotels import Hotel, HotelPATCH
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
-# hotels = [
-#     {"id": 1, "title": "Hotel 1", "name": "Hotel 1"},
-#     {"id": 2, "title": "Hotel 2", "name": "Hotel 2"},
-#     {"id": 3, "title": "Sochi", "name": "sochi"},
-#     {"id": 4, "title": "Дубай", "name": "dubai"},
-#     {"id": 5, "title": "Мальдивы", "name": "maldivi"},
-#     {"id": 6, "title": "Геленджик", "name": "gelendzhik"},
-#     {"id": 7, "title": "Москва", "name": "moscow"},
-#     {"id": 8, "title": "Казань", "name": "kazan"},
-#     {"id": 9, "title": "Санкт-Петербург", "name": "spb"},
-# ]
-
 
 @router.get("", summary="Получить список отелей")
 async def get_hotels(
@@ -83,7 +71,6 @@ async def update_hotel(
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(data, id=hotel_id)
         await session.commit()
-
     return {"status": "OK"}
 
 
