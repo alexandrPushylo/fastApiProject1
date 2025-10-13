@@ -1,10 +1,10 @@
-from fastapi import Query, APIRouter, Body
+from fastapi import Query, APIRouter, Body, HTTPException
 
-from sqlalchemy import insert, select, func
+# from sqlalchemy import insert, select, func
 
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker
-from src.models.hotels import HotelsOrm
+# from src.models.hotels import HotelsOrm
 from src.repositories.hotels import HotelsRepository
 from src.schemas.hotels import Hotel, HotelPATCH
 
@@ -58,6 +58,18 @@ async def delete_hotel(
         hotel_id: int,
 ):
     async with async_session_maker() as session:
+        count_hotels = await HotelsRepository(session).count(id=hotel_id)
+        if count_hotels < 1:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Отель не найден"
+            )
+        if count_hotels > 1:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Найдено несколько отелей"
+            )
+
         await HotelsRepository(session).delete(id=hotel_id)
         await session.commit()
     return {"status": "OK"}
@@ -69,6 +81,18 @@ async def update_hotel(
         data: Hotel,
 ):
     async with async_session_maker() as session:
+        count_hotels = await HotelsRepository(session).count(id=hotel_id)
+        if count_hotels < 1:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Отель не найден"
+            )
+        if count_hotels > 1:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Найдено несколько отелей"
+            )
+
         await HotelsRepository(session).edit(data, id=hotel_id)
         await session.commit()
     return {"status": "OK"}

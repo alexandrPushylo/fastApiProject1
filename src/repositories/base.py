@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy import ExceptionContext
 
 
 class BaseRepository:
@@ -30,3 +31,9 @@ class BaseRepository:
     async def delete(self, **filter_by):
         delete_data_stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(delete_data_stmt)
+
+    async def count(self, **filter_by) -> int:
+        query = select(self.model).filter_by(**filter_by)
+        results = await self.session.execute(query)
+        return len(results.scalars().all())
+
