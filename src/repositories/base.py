@@ -5,24 +5,30 @@ from sqlalchemy import ExceptionContext
 
 class BaseRepository:
     model = None
+    schema: BaseModel = None
 
     def __init__(self, session):
         self.session = session
 
     async def get_all(self, *args, **kwargs):
         query = select(self.model)
-        results = await self.session.execute(query)
-        return results.scalars().all()
+        result = await self.session.execute(query)
+        return [self.schema.model_validate(model, from_attributes=True) for model in result.scalars().all()]
 
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
-        results = await self.session.execute(query)
-        return results.scalars().one_or_none()
+        result = await self.session.execute(query)
+        model = result.scalars().one_or_none()
+        if model is None:
+            return None
+        else:
+            return self.schema.model_validate(model, from_attributes=True)
 
     async def add(self, data: BaseModel):
         add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         result = await self.session.execute(add_data_stmt)
-        return result.scalars().one()
+        model = result.scalars().one()
+        return self.schema.model_validate(model, from_attributes=True)
 
     async def edit(self, data: BaseModel, exclude_unset=False, **filter_by):
         edit_data_stmt = (
@@ -38,6 +44,6 @@ class BaseRepository:
 
     async def count(self, **filter_by) -> int:
         query = select(self.model).filter_by(**filter_by)
-        results = await self.session.execute(query)
-        return len(results.scalars().all())
+        result = await self.session.execute(query)
+        return len(result.scalars().all())
 
