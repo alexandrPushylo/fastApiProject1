@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Request
 
 
 from src.database import async_session_maker
@@ -40,3 +40,14 @@ async def register_user(
             raise HTTPException(status_code=409, detail="Пользователь с таким email уже существует")
 
     return {'status': 'ok'}
+
+
+@router.get("/only_auth", summary="Проверка токена")
+async def only_auth(
+        request: Request
+):
+    access_token = request.cookies.get("access_token")
+    if access_token:
+        return {'access_token': access_token}
+    else:
+        raise HTTPException(status_code=401, detail="Токен не найден")
