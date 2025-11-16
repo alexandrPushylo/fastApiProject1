@@ -4,7 +4,7 @@ from fastapi import Query, APIRouter, Body, HTTPException
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker
 from src.repositories.hotels import HotelsRepository
-from src.schemas.hotels import Hotel, HotelPATCH, HotelAdd
+from src.schemas.hotels import Hotel, HotelPatch, HotelAdd
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -111,7 +111,7 @@ async def update_hotel(
 @router.patch("/{hotel_id}", summary="Частично обновить отель")
 async def patch_hotel(
         hotel_id: int,
-        data: HotelPATCH
+        data: HotelPatch
 ):
     async with async_session_maker() as session:
         count_hotels = await HotelsRepository(session).count(id=hotel_id)
