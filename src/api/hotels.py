@@ -2,23 +2,23 @@ from fastapi import Query, APIRouter, Body, HTTPException
 
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.database import async_session_maker
-from src.repositories.hotels import HotelsRepository
-from src.schemas.hotels import Hotel, HotelPatch, HotelAdd
+from src.schemas.hotels import HotelPatch, HotelAdd
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("/{hotel_id}", summary="Получить отель")
-async def get_hotel(hotel_id: int):
-    async with async_session_maker() as session:
-        result = await HotelsRepository(session).get_one_or_none(id=hotel_id)
-        if not result:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Отель с id {hotel_id} не найден"
-            )
-        return result
+async def get_hotel(
+        db: DBDep,
+        hotel_id: int
+):
+    result = await db.hotels.get_one_or_none(id=hotel_id)
+    if not result:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Отель с id {hotel_id} не найден"
+        )
+    return result
 
 
 @router.get("", summary="Получить список отелей")
@@ -41,6 +41,7 @@ async def get_hotels(
 
 @router.post("", summary="Создать отель")
 async def create_hotel(
+        db: DBDep,
         data: HotelAdd = Body(openapi_examples={
             "1": {
                 "summary": "Сочи",
@@ -58,74 +59,73 @@ async def create_hotel(
             }
         })
 ):
-    async with async_session_maker() as session:
-        hotel = await HotelsRepository(session).add(data)
-        await session.commit()
+    hotel = await db.hotels.add(data)
+    await db.commit()
     return {"status": "OK", "data": hotel}
 
 
 @router.delete("/{hotel_id}", summary="Удалить отель")
 async def delete_hotel(
+        db: DBDep,
         hotel_id: int,
 ):
-    async with async_session_maker() as session:
-        count_hotels = await HotelsRepository(session).count(id=hotel_id)
-        if count_hotels < 1:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Отель не найден"
-            )
-        if count_hotels > 1:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Найдено несколько отелей"
-            )
+    count_hotels = await db.hotels.count(id=hotel_id)
+    if count_hotels < 1:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Отель не найден"
+        )
+    if count_hotels > 1:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Найдено несколько отелей"
+        )
 
-        await HotelsRepository(session).delete(id=hotel_id)
-        await session.commit()
+    await db.hotels.delete(id=hotel_id)
+    await db.commit()
     return {"status": "OK"}
 
 
 @router.put("/{hotel_id}", summary="Обновить отель")
 async def update_hotel(
+        db: DBDep,
         hotel_id: int,
         data: HotelAdd,
 ):
-    async with async_session_maker() as session:
-        count_hotels = await HotelsRepository(session).count(id=hotel_id)
-        if count_hotels < 1:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Отель не найден"
-            )
-        if count_hotels > 1:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Найдено несколько отелей"
-            )
+    count_hotels = await db.hotels.count(id=hotel_id)
+    if count_hotels < 1:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Отель не найден"
+        )
+    if count_hotels > 1:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Найдено несколько отелей"
+        )
 
-        await HotelsRepository(session).edit(data, id=hotel_id)
-        await session.commit()
+    await db.hotels.edit(data, id=hotel_id)
+    await db.commit()
     return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}", summary="Частично обновить отель")
 async def patch_hotel(
+        db: DBDep,
         hotel_id: int,
         data: HotelPatch
 ):
-    async with async_session_maker() as session:
-        count_hotels = await HotelsRepository(session).count(id=hotel_id)
-        if count_hotels < 1:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Отель не найден"
-            )
-        if count_hotels > 1:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Найдено несколько отелей"
-            )
-        await HotelsRepository(session).edit(data, exclude_unset=True, id=hotel_id)
-        await session.commit()
+    count_hotels = await db.hotels.count(id=hotel_id)
+    if count_hotels < 1:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Отель не найден"
+        )
+    if count_hotels > 1:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Найдено несколько отелей"
+        )
+    await db.hotels.edit(data, exclude_unset=True, id=hotel_id)
+    await db.commit()
     return {"status": "OK"}
