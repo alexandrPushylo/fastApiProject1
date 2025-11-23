@@ -39,8 +39,20 @@ class RoomsRepository(BaseRepository):
             .cte("rooms_left_table")
         )
 
-        query = (
-            select(rooms_left_table)
-            .select_from(rooms_left_table)
-            .filter(rooms_left_table.c.rooms_left > 0)
+        rooms_ids_for_hotel = (
+            select(RoomsOrm.id)
+            .select_from(RoomsOrm)
+            .filter_by(hotel_id=hotel_id)
+            .subquery("rooms_ids_for_hotel")
         )
+
+        rooms_ids_to_get = (
+            select(rooms_left_table.c.room_id)
+            .select_from(rooms_left_table)
+            .filter(
+                rooms_left_table.c.rooms_left > 0,
+                rooms_left_table.c.room_id.in_(rooms_ids_for_hotel),
+            )
+        )
+
+        return await self.get_filtered(RoomsOrm.id.in_(rooms_ids_to_get))
