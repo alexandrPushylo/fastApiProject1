@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import Query, APIRouter, Body, HTTPException
 
 
@@ -26,17 +28,20 @@ async def get_hotels(
         db: DBDep,
         pagination: PaginationDep,
         location: str | None = Query(None, description="Hotel Location"),
-        title: str | None = Query(None, description="Hotel Title")
+        title: str | None = Query(None, description="Hotel Title"),
+        date_from: date = Query(example="2025-01-01"),
+        date_to: date = Query(example="2025-02-01"),
 ):
 
-    limit = pagination.per_page
-    offset = (pagination.page - 1) * pagination.per_page
-    return await db.hotel.get_all(
-        location=location,
-        title=title,
-        limit=limit,
-        offset=offset
-    )
+    # limit = pagination.per_page
+    # offset = (pagination.page - 1) * pagination.per_page
+    # return await db.hotel.get_all(
+    #     location=location,
+    #     title=title,
+    #     limit=limit,
+    #     offset=offset
+    # )
+    return await db.hotels.get_filtered_by_time(date_from=date_from, date_to=date_to)
 
 
 @router.post("", summary="Создать отель")
