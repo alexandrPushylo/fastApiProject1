@@ -33,15 +33,17 @@ async def get_hotels(
         date_to: date = Query(example="2025-02-01"),
 ):
 
-    # limit = pagination.per_page
-    # offset = (pagination.page - 1) * pagination.per_page
-    # return await db.hotel.get_all(
-    #     location=location,
-    #     title=title,
-    #     limit=limit,
-    #     offset=offset
-    # )
-    return await db.hotels.get_filtered_by_time(date_from=date_from, date_to=date_to)
+    limit = pagination.per_page
+    offset = (pagination.page - 1) * pagination.per_page
+
+    return await db.hotels.get_filtered_by_time(
+        date_from=date_from,
+        date_to=date_to,
+        location=location,
+        title=title,
+        limit=limit,
+        offset=offset
+    )
 
 
 @router.post("", summary="Создать отель")
