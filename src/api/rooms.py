@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import APIRouter, Body, HTTPException, Query
 
 from src.api.dependencies import DBDep
-from src.schemas.facilities import RoomFacilities
+from src.schemas.facilities import RoomFacilitiesAdd
 from src.schemas.rooms import RoomPatch, RoomAdd, RoomAddDto, RoomPatchDto
 
 
@@ -60,8 +60,8 @@ async def create_room(
     room_data = RoomAdd(hotel_id=hotel_id, **data.model_dump())
     room = await db.rooms.add(room_data)
 
-    rooms_facilities_data = [RoomFacilities(room_id=room.id, facility_id=facility.id)
-                             for facility in data.facilities_ids]
+    rooms_facilities_data = [RoomFacilitiesAdd(room_id=room.id, facilities_id=facility_id)
+                             for facility_id in data.facilities_ids]
 
     await db.rooms_facilities.add_bulk(rooms_facilities_data)
 
