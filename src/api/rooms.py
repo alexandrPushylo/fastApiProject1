@@ -111,7 +111,10 @@ async def update_room(
             status_code=400,
             detail=f"Найдено несколько номеров"
         )
+
+    await db.rooms_facilities.set_facilities(facilities_ids=data.facilities_ids, room_id=room_id)
     await db.rooms.edit(room_data, id=room_id)
+
     await db.commit()
     return {"status": "OK"}
 
@@ -123,7 +126,8 @@ async def patch_room(
         data: RoomPatchDto,
         db: DBDep
 ):
-    room_data = RoomPatch(hotel_id=hotel_id, **data.model_dump())
+    room_data_dict = data.model_dump(exclude_unset=True)
+    room_data = RoomPatch(hotel_id=hotel_id, **room_data_dict)
     count_rooms = await db.rooms.count(id=room_id)
     if count_rooms < 1:
         raise HTTPException(
@@ -136,5 +140,7 @@ async def patch_room(
             detail=f"Найдено несколько номеров"
         )
     await db.rooms.edit(room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
+    if "facilities_ids" in room_data_dict:
+        await db.rooms_facilities.set_facilities(facilities_ids=room_data_dict["facilities_ids"], room_id=room_id)
     await db.commit()
     return {"status": "OK"}
