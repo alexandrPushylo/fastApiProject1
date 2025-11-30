@@ -9,7 +9,7 @@ class FacilitiesAdd(FacilitiesDto):
     pass
 
 
-class Facilities(FacilitiesDto):
+class Facility(FacilitiesDto):
     id: int
 
 
