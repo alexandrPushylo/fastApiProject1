@@ -16,7 +16,7 @@ async def get_room(
         hotel_id: int,
         room_id: int
 ):
-    result = await db.rooms.get_one_or_none(hotel_id=hotel_id, id=room_id)
+    result = await db.rooms.get_one_or_none_with_rels(hotel_id=hotel_id, id=room_id)
     if not result:
         raise HTTPException(status_code=404, detail=f"Номер с id {room_id} не найден")
     return result
