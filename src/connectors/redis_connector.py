@@ -14,7 +14,7 @@ class RedisManager:
         if expire:
             await self.redis.set(key, value, ex=expire)
         else:
-            self.redis.set(key, value)
+            await self.redis.set(key, value)
 
     async def get(self, key: str):
         return await self.redis.get(key)

@@ -1,8 +1,11 @@
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
 import uvicorn
+
+from src.init import redis_manager
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -14,7 +17,14 @@ from src.api.bookings import router as booking_router
 from src.api.facilities import router as facility_router
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await redis_manager.connect()
+    yield
+    await redis_manager.close()
+
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(hotels_router)
 app.include_router(rooms_router)
