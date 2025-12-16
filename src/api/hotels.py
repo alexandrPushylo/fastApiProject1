@@ -1,6 +1,7 @@
 from datetime import date
 
 from fastapi import Query, APIRouter, Body, HTTPException
+from fastapi_cache.decorator import cache
 
 
 from src.api.dependencies import PaginationDep, DBDep
@@ -24,6 +25,7 @@ async def get_hotel(
 
 
 @router.get("", summary="Получить список отелей")
+@cache(expire=10)
 async def get_hotels(
         db: DBDep,
         pagination: PaginationDep,
