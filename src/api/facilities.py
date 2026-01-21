@@ -2,8 +2,10 @@ from fastapi import APIRouter, Body
 from fastapi_cache.decorator import cache
 
 
-from src.api.dependencies import DBDep, UserIdDep
+from src.api.dependencies import DBDep
 from src.schemas.facilities import FacilitiesDto, FacilitiesAdd
+
+from src.tasks.tasks import test_task
 
 router = APIRouter(prefix="/facilities", tags=["Удобства"])
 
@@ -11,24 +13,13 @@ router = APIRouter(prefix="/facilities", tags=["Удобства"])
 @router.get("", summary="Получить все удобства")
 @cache(expire=10)
 async def get_facilities(db: DBDep):
-    # facilities_from_cache = await redis_manager.get("facilities")
-    # if not facilities_from_cache:
-    #     facilities = await db.facilities.get_all()
-    #     facilities_schema: list[dict] = [f.model_dump() for f in facilities]
-    #     facilities_json = json.dumps(facilities_schema)
-    #     await redis_manager.set("facilities", facilities_json)
-    #     return facilities
-    #
-    # else:
-    #     facilities_dict = json.loads(facilities_from_cache)
-    #     return facilities_dict
+    test_task.delay()
     return await db.facilities.get_all()
 
 
 @router.post("", summary="Создать удобство")
 async def create_facility(
         db: DBDep,
-        user_id: UserIdDep,
         data: FacilitiesDto = Body()
 ):
     facility = FacilitiesAdd(**data.model_dump())
