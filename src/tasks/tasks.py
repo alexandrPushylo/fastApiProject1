@@ -1,9 +1,12 @@
+import asyncio
 import os
 from time import sleep
 
 from PIL import Image
 
+from src.database import async_session_maker_null_pool
 from src.tasks.celery_app import celery_instance
+from src.utils.db_manager import DBManager
 
 
 @celery_instance.task
@@ -26,3 +29,13 @@ def resize_image(image_path: str):
         new_file_name = f"{name}_{size}px{ext}"
         output_path = os.path.join(output_folder, new_file_name)
         img_resized.save(output_path)
+
+
+async def get_booking_with_today_checkin_helper():
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        booking = await db.bookings.get_bookings_with_today_checkin()
+        print(booking)
+
+@celery_instance.task(name="booking_today_checkin")
+def send_email_to_users_with_today_checking():
+    asyncio.run(get_booking_with_today_checkin_helper())
