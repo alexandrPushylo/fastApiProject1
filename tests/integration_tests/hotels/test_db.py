@@ -10,5 +10,4 @@ async def test_add_hotels():
         new_hotel = await db.hotels.add(hotel_data)
         await db.commit()
 
-        print(new_hotel)
         assert new_hotel.title == "Azure"
