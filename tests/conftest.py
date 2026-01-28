@@ -5,6 +5,7 @@ import json
 import shutil
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from src.api.dependencies import get_db
 from schemas.hotels import HotelAdd
 from schemas.rooms import RoomAdd
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
@@ -21,10 +22,16 @@ async def check_test_mode():
     assert settings.MODE == "TEST"
 
 
-@pytest.fixture(scope='function')
-async def db() -> AsyncGenerator[DBManager, Any]:
+async def get_db_null_pool() -> AsyncGenerator[DBManager, Any]:
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         yield db
+
+@pytest.fixture(scope='function')
+async def db() -> AsyncGenerator[DBManager, Any]:
+    async for db in get_db_null_pool():
+        yield db
+
+app.dependency_overrides[get_db] = get_db_null_pool
 
 @pytest.fixture(scope="session")
 async def ac() -> AsyncGenerator[AsyncClient, Any]:
