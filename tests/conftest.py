@@ -1,9 +1,10 @@
 from typing import Any, AsyncGenerator
 
-import pytest
 import json
-import shutil
-from sqlalchemy.ext.asyncio import create_async_engine
+from unittest import mock
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda fn: fn).start()
+
+import pytest
 
 from src.api.dependencies import get_db
 from schemas.hotels import HotelAdd
