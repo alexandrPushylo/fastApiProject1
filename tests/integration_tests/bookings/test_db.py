@@ -13,10 +13,11 @@ async def test_add_crud(db):
         user_id=user.id,
         price=100,
     )
-    await db.bookings.add(booking_data)
-    booking = await db.bookings.get_one_or_none(room_id=room.id, user_id=user.id)
-    assert booking.price == booking_data.price
-    assert booking.room_id == booking_data.room_id
+    new_booking = await db.bookings.add(booking_data)
+    booking = await db.bookings.get_one_or_none(id=new_booking.id)
+    assert booking.id == new_booking.id
+    assert booking.price == new_booking.price
+    assert booking.room_id == new_booking.room_id
 
     new_booking_data = BookingAdd(
         room_id=room.id,
