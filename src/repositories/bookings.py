@@ -2,6 +2,9 @@ from datetime import date
 
 from sqlalchemy import select
 
+from models import RoomsOrm
+from repositories.utils import rooms_ids_for_booking
+from src.schemas.bookings import BookingAdd
 from src.models.bookings import BookingsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper
@@ -18,3 +21,17 @@ class BookingsRepository(BaseRepository):
         )
         res = await self.session.execute(query)
         return [self.mapper.map_to_domain_entity(booking) for booking in res.scalars().all()]
+
+    async def add_booking(self, data: BookingAdd, hotel_id: int | None = None):
+        rooms_ids_to_get = rooms_ids_for_booking(
+            date_from=data.date_from,
+            date_to=data.date_to,
+            hotel_id=hotel_id
+        )
+        rooms_ids = (await self.session.execute(rooms_ids_to_get)).scalars().all()
+
+        if data.room_id in rooms_ids:
+            return await self.add(data)
+        else:
+            raise Exception
+
