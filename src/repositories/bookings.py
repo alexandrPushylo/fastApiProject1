@@ -1,5 +1,6 @@
 from datetime import date
 
+from fastapi import HTTPException
 from sqlalchemy import select
 
 from models import RoomsOrm
@@ -33,5 +34,5 @@ class BookingsRepository(BaseRepository):
         if data.room_id in rooms_ids:
             return await self.add(data)
         else:
-            raise Exception
+            raise HTTPException(status_code=500)
 
