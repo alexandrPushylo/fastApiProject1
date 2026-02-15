@@ -80,12 +80,12 @@ async def delete_room(
     if count_rooms < 1:
         raise HTTPException(
             status_code=404,
-            detail=f"Номер не найден"
+            detail="Номер не найден"
         )
     if count_rooms > 1:
         raise HTTPException(
             status_code=400,
-            detail=f"Найдено несколько номеров"
+            detail="Найдено несколько номеров"
         )
 
     await db.rooms.delete(id=room_id, hotel_id=hotel_id)
@@ -105,12 +105,12 @@ async def update_room(
     if count_rooms < 1:
         raise HTTPException(
             status_code=404,
-            detail=f"Номер не найден"
+            detail="Номер не найден"
         )
     if count_rooms > 1:
         raise HTTPException(
             status_code=400,
-            detail=f"Найдено несколько номеров"
+            detail="Найдено несколько номеров"
         )
 
     await db.rooms_facilities.set_facilities(facilities_ids=data.facilities_ids, room_id=room_id)
@@ -133,12 +133,12 @@ async def patch_room(
     if count_rooms < 1:
         raise HTTPException(
             status_code=404,
-            detail=f"Номер не найден"
+            detail="Номер не найден"
         )
     if count_rooms > 1:
         raise HTTPException(
             status_code=400,
-            detail=f"Найдено несколько номеров"
+            detail="Найдено несколько номеров"
         )
     await db.rooms.edit(room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
     if "facilities_ids" in room_data_dict:

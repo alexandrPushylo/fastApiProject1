@@ -3,7 +3,6 @@ from datetime import date
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from models import RoomsOrm
 from repositories.utils import rooms_ids_for_booking
 from src.schemas.bookings import BookingAdd
 from src.models.bookings import BookingsOrm
