@@ -54,4 +54,3 @@ class BaseRepository:
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
         return len(result.scalars().all())
-

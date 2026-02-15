@@ -8,11 +8,7 @@ router = APIRouter(prefix="/auth", tags=["Аутентификация и авт
 
 
 @router.post("/login", summary="Авторизация пользователя")
-async def login_user(
-        db: DBDep,
-        data: UserRequestAdd,
-        response: Response
-):
+async def login_user(db: DBDep, data: UserRequestAdd, response: Response):
 
     user = await db.users.get_user_with_hashed_password(email=data.email)
     if not user:
@@ -22,14 +18,11 @@ async def login_user(
     access_token = AuthService().create_access_token({"user_id": user.id})
     response.set_cookie("access_token", access_token)
 
-    return {'access_token': access_token}
+    return {"access_token": access_token}
 
 
 @router.post("/register", summary="Регистрация пользователя")
-async def register_user(
-        db: DBDep,
-        data: UserRequestAdd
-):
+async def register_user(db: DBDep, data: UserRequestAdd):
     hashed_password = AuthService().hash_password(data.password)
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
 
@@ -39,21 +32,16 @@ async def register_user(
     except ValueError:
         raise HTTPException(status_code=409, detail="Пользователь с таким email уже существует")
 
-    return {'status': 'ok'}
+    return {"status": "ok"}
 
 
 @router.get("/me", summary="Проверка токена")
-async def get_me(
-        db: DBDep,
-        user_id: UserIdDep
-):
+async def get_me(db: DBDep, user_id: UserIdDep):
     user = await db.users.get_one_or_none(id=user_id)
     return user
 
 
 @router.post("/logout", summary="Выход пользователя")
-async def logout(
-        response: Response
-):
+async def logout(response: Response):
     response.delete_cookie("access_token")
-    return {'status': 'ok'}
+    return {"status": "ok"}

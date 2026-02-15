@@ -14,10 +14,11 @@ def test_task():
     sleep(5)
     print("Done")
 
+
 @celery_instance.task
 def resize_image(image_path: str):
     sizes = [1000, 500, 200]
-    output_folder = 'src/static/images/'
+    output_folder = "src/static/images/"
 
     img = Image.open(image_path)
 
@@ -25,7 +26,9 @@ def resize_image(image_path: str):
     name, ext = os.path.splitext(base_name)
 
     for size in sizes:
-        img_resized = img.resize((size, int(img.height * (size / img.width))), Image.Resampling.LANCZOS)
+        img_resized = img.resize(
+            (size, int(img.height * (size / img.width))), Image.Resampling.LANCZOS
+        )
         new_file_name = f"{name}_{size}px{ext}"
         output_path = os.path.join(output_folder, new_file_name)
         img_resized.save(output_path)
@@ -35,6 +38,7 @@ async def get_booking_with_today_checkin_helper():
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         booking = await db.bookings.get_bookings_with_today_checkin()
         print(booking)
+
 
 @celery_instance.task(name="booking_today_checkin")
 def send_email_to_users_with_today_checking():

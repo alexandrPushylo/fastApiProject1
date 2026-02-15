@@ -3,15 +3,15 @@ from celery import Celery
 from src.config import settings
 
 celery_instance = Celery(
-    'tasks',
+    "tasks",
     broker_url=settings.REDIS_URL,
     include=[
-        'src.tasks.tasks',
+        "src.tasks.tasks",
     ],
 )
 
 celery_instance.conf.beat_schedule = {
-    "just_title":{
+    "just_title": {
         "task": "booking_today_checkin",
         "schedule": 5,
     }

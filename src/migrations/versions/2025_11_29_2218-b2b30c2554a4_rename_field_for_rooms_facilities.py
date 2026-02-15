@@ -21,17 +21,13 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    op.add_column(
-        "room_facilities", sa.Column("facility_id", sa.Integer(), nullable=False)
-    )
+    op.add_column("room_facilities", sa.Column("facility_id", sa.Integer(), nullable=False))
     op.drop_constraint(
         op.f("room_facilities_facilities_id_fkey"),
         "room_facilities",
         type_="foreignkey",
     )
-    op.create_foreign_key(
-        None, "room_facilities", "facilities", ["facility_id"], ["id"]
-    )
+    op.create_foreign_key(None, "room_facilities", "facilities", ["facility_id"], ["id"])
     op.drop_column("room_facilities", "facilities_id")
 
 

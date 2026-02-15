@@ -11,11 +11,7 @@ router = APIRouter(prefix="/hotels", tags=["Номера"])
 
 
 @router.get("/{hotel_id}/rooms/{room_id}", summary="Получить номер отеля")
-async def get_room(
-        db: DBDep,
-        hotel_id: int,
-        room_id: int
-):
+async def get_room(db: DBDep, hotel_id: int, room_id: int):
     result = await db.rooms.get_one_or_none_with_rels(hotel_id=hotel_id, id=room_id)
     if not result:
         raise HTTPException(status_code=404, detail=f"Номер с id {room_id} не найден")
@@ -24,19 +20,22 @@ async def get_room(
 
 @router.get("/{hotel_id}/rooms", summary="Получить список номеров отеля")
 async def get_rooms(
-        hotel_id: int,
-        db: DBDep,
-        date_from: date = Query(examples=["2025-01-01"]),
-        date_to: date = Query(examples=["2025-02-01"]),
+    hotel_id: int,
+    db: DBDep,
+    date_from: date = Query(examples=["2025-01-01"]),
+    date_to: date = Query(examples=["2025-02-01"]),
 ):
-    return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
+    return await db.rooms.get_filtered_by_time(
+        hotel_id=hotel_id, date_from=date_from, date_to=date_to
+    )
 
 
 @router.post("/{hotel_id}/rooms", summary="Создать номер отеля")
 async def create_room(
-        db: DBDep,
-        hotel_id: int,
-        data: RoomAddDto = Body(openapi_examples={
+    db: DBDep,
+    hotel_id: int,
+    data: RoomAddDto = Body(
+        openapi_examples={
             "1": {
                 "summary": "Стандарт",
                 "value": {
@@ -45,7 +44,7 @@ async def create_room(
                     "price": 1000,
                     "quantity": 2,
                     "facilities_ids": [2],
-                }
+                },
             },
             "2": {
                 "summary": "Люкс",
@@ -55,15 +54,18 @@ async def create_room(
                     "price": 10000,
                     "quantity": 1,
                     "facilities_ids": [2],
-                }
-            }
-        })
+                },
+            },
+        }
+    ),
 ):
     room_data = RoomAdd(hotel_id=hotel_id, **data.model_dump())
     room = await db.rooms.add(room_data)
 
-    rooms_facilities_data = [RoomFacilitiesAdd(room_id=room.id, facility_id=facility_id)
-                             for facility_id in data.facilities_ids]
+    rooms_facilities_data = [
+        RoomFacilitiesAdd(room_id=room.id, facility_id=facility_id)
+        for facility_id in data.facilities_ids
+    ]
     await db.rooms_facilities.add_bulk(rooms_facilities_data)
 
     await db.commit()
@@ -71,22 +73,12 @@ async def create_room(
 
 
 @router.delete("/{hotel_id}/rooms/{room_id}", summary="Удалить номер отеля")
-async def delete_room(
-        db: DBDep,
-        hotel_id: int,
-        room_id: int
-):
+async def delete_room(db: DBDep, hotel_id: int, room_id: int):
     count_rooms = await db.rooms.count(id=room_id)
     if count_rooms < 1:
-        raise HTTPException(
-            status_code=404,
-            detail="Номер не найден"
-        )
+        raise HTTPException(status_code=404, detail="Номер не найден")
     if count_rooms > 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Найдено несколько номеров"
-        )
+        raise HTTPException(status_code=400, detail="Найдено несколько номеров")
 
     await db.rooms.delete(id=room_id, hotel_id=hotel_id)
     await db.commit()
@@ -94,24 +86,13 @@ async def delete_room(
 
 
 @router.put("/{hotel_id}/rooms/{room_id}", summary="Обновить номер отеля")
-async def update_room(
-        hotel_id: int,
-        room_id: int,
-        data: RoomAddDto,
-        db: DBDep
-):
+async def update_room(hotel_id: int, room_id: int, data: RoomAddDto, db: DBDep):
     room_data = RoomAdd(hotel_id=hotel_id, **data.model_dump())
     count_rooms = await db.rooms.count(id=room_id)
     if count_rooms < 1:
-        raise HTTPException(
-            status_code=404,
-            detail="Номер не найден"
-        )
+        raise HTTPException(status_code=404, detail="Номер не найден")
     if count_rooms > 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Найдено несколько номеров"
-        )
+        raise HTTPException(status_code=400, detail="Найдено несколько номеров")
 
     await db.rooms_facilities.set_facilities(facilities_ids=data.facilities_ids, room_id=room_id)
     await db.rooms.edit(room_data, id=room_id)
@@ -121,27 +102,18 @@ async def update_room(
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}", summary="Частично обновить номер отеля")
-async def patch_room(
-        hotel_id: int,
-        room_id: int,
-        data: RoomPatchDto,
-        db: DBDep
-):
+async def patch_room(hotel_id: int, room_id: int, data: RoomPatchDto, db: DBDep):
     room_data_dict = data.model_dump(exclude_unset=True)
     room_data = RoomPatch(hotel_id=hotel_id, **room_data_dict)
     count_rooms = await db.rooms.count(id=room_id)
     if count_rooms < 1:
-        raise HTTPException(
-            status_code=404,
-            detail="Номер не найден"
-        )
+        raise HTTPException(status_code=404, detail="Номер не найден")
     if count_rooms > 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Найдено несколько номеров"
-        )
+        raise HTTPException(status_code=400, detail="Найдено несколько номеров")
     await db.rooms.edit(room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
     if "facilities_ids" in room_data_dict:
-        await db.rooms_facilities.set_facilities(facilities_ids=room_data_dict["facilities_ids"], room_id=room_id)
+        await db.rooms_facilities.set_facilities(
+            facilities_ids=room_data_dict["facilities_ids"], room_id=room_id
+        )
     await db.commit()
     return {"status": "OK"}

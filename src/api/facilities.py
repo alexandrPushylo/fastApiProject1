@@ -6,7 +6,6 @@ from src.api.dependencies import DBDep
 from src.schemas.facilities import FacilitiesDto, FacilitiesAdd
 
 
-
 router = APIRouter(prefix="/facilities", tags=["Удобства"])
 
 
@@ -17,13 +16,8 @@ async def get_facilities(db: DBDep):
 
 
 @router.post("", summary="Создать удобство")
-async def create_facility(
-        db: DBDep,
-        data: FacilitiesDto = Body()
-):
+async def create_facility(db: DBDep, data: FacilitiesDto = Body()):
     facility = FacilitiesAdd(**data.model_dump())
     result = await db.facilities.add(facility)
     await db.commit()
     return {"status": "OK", "data": result}
-
-

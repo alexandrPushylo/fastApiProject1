@@ -16,8 +16,7 @@ class FacilitiesOrm(Base):
     title: Mapped[str] = mapped_column(String(100))
 
     rooms: Mapped[list["RoomsOrm"]] = relationship(
-        secondary="room_facilities",
-        back_populates="facilities"
+        secondary="room_facilities", back_populates="facilities"
     )
 
 

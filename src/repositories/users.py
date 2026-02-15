@@ -19,7 +19,7 @@ class UsersRepository(BaseRepository):
             model = result.scalars().one()
             return self.mapper.map_to_domain_entity(model)
         except IntegrityError:
-            raise ValueError('User already exists')
+            raise ValueError("User already exists")
 
     async def get_user_with_hashed_password(self, email: EmailStr) -> UserWithHashedPassword | None:
         query = select(self.model).filter_by(email=email)

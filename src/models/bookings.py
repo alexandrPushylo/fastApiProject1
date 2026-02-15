@@ -20,4 +20,3 @@ class BookingsOrm(Base):
     @hybrid_property
     def total_price(self):
         return self.price * (self.date_to - self.date_from).days
-

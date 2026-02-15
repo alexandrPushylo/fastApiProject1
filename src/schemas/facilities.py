@@ -20,6 +20,3 @@ class RoomFacilitiesAdd(BaseModel):
 
 class RoomFacilities(RoomFacilitiesAdd):
     id: int
-
-
-

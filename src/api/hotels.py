@@ -11,28 +11,22 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
 @router.get("/{hotel_id}", summary="Получить отель")
-async def get_hotel(
-        db: DBDep,
-        hotel_id: int
-):
+async def get_hotel(db: DBDep, hotel_id: int):
     result = await db.hotels.get_one_or_none(id=hotel_id)
     if not result:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Отель с id {hotel_id} не найден"
-        )
+        raise HTTPException(status_code=404, detail=f"Отель с id {hotel_id} не найден")
     return result
 
 
 @router.get("", summary="Получить список отелей")
 @cache(expire=10)
 async def get_hotels(
-        db: DBDep,
-        pagination: PaginationDep,
-        location: str | None = Query(None, description="Hotel Location"),
-        title: str | None = Query(None, description="Hotel Title"),
-        date_from: date = Query(examples=["2025-01-01"]),
-        date_to: date = Query(examples=["2025-02-01"]),
+    db: DBDep,
+    pagination: PaginationDep,
+    location: str | None = Query(None, description="Hotel Location"),
+    title: str | None = Query(None, description="Hotel Title"),
+    date_from: date = Query(examples=["2025-01-01"]),
+    date_to: date = Query(examples=["2025-02-01"]),
 ):
 
     limit = pagination.per_page
@@ -44,29 +38,31 @@ async def get_hotels(
         location=location,
         title=title,
         limit=limit,
-        offset=offset
+        offset=offset,
     )
 
 
 @router.post("", summary="Создать отель")
 async def create_hotel(
-        db: DBDep,
-        data: HotelAdd = Body(openapi_examples={
+    db: DBDep,
+    data: HotelAdd = Body(
+        openapi_examples={
             "1": {
                 "summary": "Сочи",
                 "value": {
                     "title": "Отель Сочи 5 звезд у моря",
                     "location": "sochi_u_morya",
-                }
+                },
             },
             "2": {
                 "summary": "Дубай",
                 "value": {
                     "title": "Отель Дубай У фонтана",
                     "location": "dubai_fountain",
-                }
-            }
-        })
+                },
+            },
+        }
+    ),
 ):
     hotel = await db.hotels.add(data)
     await db.commit()
@@ -75,20 +71,14 @@ async def create_hotel(
 
 @router.delete("/{hotel_id}", summary="Удалить отель")
 async def delete_hotel(
-        db: DBDep,
-        hotel_id: int,
+    db: DBDep,
+    hotel_id: int,
 ):
     count_hotels = await db.hotels.count(id=hotel_id)
     if count_hotels < 1:
-        raise HTTPException(
-            status_code=404,
-            detail="Отель не найден"
-        )
+        raise HTTPException(status_code=404, detail="Отель не найден")
     if count_hotels > 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Найдено несколько отелей"
-        )
+        raise HTTPException(status_code=400, detail="Найдено несколько отелей")
 
     await db.hotels.delete(id=hotel_id)
     await db.commit()
@@ -97,21 +87,15 @@ async def delete_hotel(
 
 @router.put("/{hotel_id}", summary="Обновить отель")
 async def update_hotel(
-        db: DBDep,
-        hotel_id: int,
-        data: HotelAdd,
+    db: DBDep,
+    hotel_id: int,
+    data: HotelAdd,
 ):
     count_hotels = await db.hotels.count(id=hotel_id)
     if count_hotels < 1:
-        raise HTTPException(
-            status_code=404,
-            detail="Отель не найден"
-        )
+        raise HTTPException(status_code=404, detail="Отель не найден")
     if count_hotels > 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Найдено несколько отелей"
-        )
+        raise HTTPException(status_code=400, detail="Найдено несколько отелей")
 
     await db.hotels.edit(data, id=hotel_id)
     await db.commit()
@@ -119,22 +103,12 @@ async def update_hotel(
 
 
 @router.patch("/{hotel_id}", summary="Частично обновить отель")
-async def patch_hotel(
-        db: DBDep,
-        hotel_id: int,
-        data: HotelPatch
-):
+async def patch_hotel(db: DBDep, hotel_id: int, data: HotelPatch):
     count_hotels = await db.hotels.count(id=hotel_id)
     if count_hotels < 1:
-        raise HTTPException(
-            status_code=404,
-            detail="Отель не найден"
-        )
+        raise HTTPException(status_code=404, detail="Отель не найден")
     if count_hotels > 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Найдено несколько отелей"
-        )
+        raise HTTPException(status_code=400, detail="Найдено несколько отелей")
     await db.hotels.edit(data, exclude_unset=True, id=hotel_id)
     await db.commit()
     return {"status": "OK"}

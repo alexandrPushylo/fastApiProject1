@@ -16,6 +16,3 @@ class BookingAdd(BookingAddDto):
 
 class Booking(BookingAdd):
     id: int
-
-
-

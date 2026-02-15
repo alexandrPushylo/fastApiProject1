@@ -8,11 +8,7 @@ router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
 @router.post("", summary="Создать бронирование")
-async def create_booking(
-        db: DBDep,
-        user_id: UserIdDep,
-        data: BookingAddDto = Body()
-):
+async def create_booking(db: DBDep, user_id: UserIdDep, data: BookingAddDto = Body()):
     room = await db.rooms.get_one_or_none(id=data.room_id)
     hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
     booking = BookingAdd(user_id=user_id, price=room.price, **data.model_dump())
@@ -30,4 +26,3 @@ async def get_bookings(db: DBDep):
 @router.get("/me", summary="Получить все бронирования пользователя")
 async def get_my_bookings(db: DBDep, user_id: UserIdDep):
     return await db.bookings.get_filtered(user_id=user_id)
-
