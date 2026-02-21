@@ -9,3 +9,6 @@ class NabronirovalException(Exception):
 
 class ObjectNotFoundException(NabronirovalException):
     detail = "Объект не найден"
+
+class NotExistsFreeRoomsException(NabronirovalException):
+    detail = "Не осталось сободных номеров"

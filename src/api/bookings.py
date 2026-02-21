@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, HTTPException
 
-from src.exceptions import ObjectNotFoundException
+from src.exceptions import ObjectNotFoundException, NotExistsFreeRoomsException
 from src.api.dependencies import DBDep, UserIdDep
 from src.schemas.bookings import BookingAddDto, BookingAdd
 
@@ -16,7 +16,10 @@ async def create_booking(db: DBDep, user_id: UserIdDep, data: BookingAddDto = Bo
     hotel = await db.hotels.get_one_or_none(id=room.hotel_id)
     booking = BookingAdd(user_id=user_id, price=room.price, **data.model_dump())
 
-    result = await db.bookings.add_booking(data=booking, hotel_id=hotel.id)
+    try:
+        result = await db.bookings.add_booking(data=booking, hotel_id=hotel.id)
+    except NotExistsFreeRoomsException as ex:
+        HTTPException(status_code=409, detail=ex.detail)
     await db.commit()
     return {"status": "OK", "data": result}
 
