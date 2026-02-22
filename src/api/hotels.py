@@ -5,6 +5,11 @@ from fastapi_cache.decorator import cache
 
 
 from src.api.dependencies import PaginationDep, DBDep
+from src.exceptions import (
+    check_date_to_after_date_from,
+    ObjectNotFoundException,
+    HotelNotFoundHTTPException
+)
 from src.schemas.hotels import HotelPatch, HotelAdd
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -12,9 +17,10 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 @router.get("/{hotel_id}", summary="Получить отель")
 async def get_hotel(db: DBDep, hotel_id: int):
-    result = await db.hotels.get_one_or_none(id=hotel_id)
-    if not result:
-        raise HTTPException(status_code=404, detail=f"Отель с id {hotel_id} не найден")
+    try:
+        result = await db.hotels.get_one(id=hotel_id)
+    except ObjectNotFoundException:
+        raise HotelNotFoundHTTPException
     return result
 
 
@@ -28,7 +34,7 @@ async def get_hotels(
     date_from: date = Query(examples=["2025-01-01"]),
     date_to: date = Query(examples=["2025-02-01"]),
 ):
-
+    check_date_to_after_date_from(date_from, date_to)
     limit = pagination.per_page
     offset = (pagination.page - 1) * pagination.per_page
 
@@ -74,12 +80,6 @@ async def delete_hotel(
     db: DBDep,
     hotel_id: int,
 ):
-    count_hotels = await db.hotels.count(id=hotel_id)
-    if count_hotels < 1:
-        raise HTTPException(status_code=404, detail="Отель не найден")
-    if count_hotels > 1:
-        raise HTTPException(status_code=400, detail="Найдено несколько отелей")
-
     await db.hotels.delete(id=hotel_id)
     await db.commit()
     return {"status": "OK"}
@@ -91,12 +91,6 @@ async def update_hotel(
     hotel_id: int,
     data: HotelAdd,
 ):
-    count_hotels = await db.hotels.count(id=hotel_id)
-    if count_hotels < 1:
-        raise HTTPException(status_code=404, detail="Отель не найден")
-    if count_hotels > 1:
-        raise HTTPException(status_code=400, detail="Найдено несколько отелей")
-
     await db.hotels.edit(data, id=hotel_id)
     await db.commit()
     return {"status": "OK"}
@@ -104,11 +98,6 @@ async def update_hotel(
 
 @router.patch("/{hotel_id}", summary="Частично обновить отель")
 async def patch_hotel(db: DBDep, hotel_id: int, data: HotelPatch):
-    count_hotels = await db.hotels.count(id=hotel_id)
-    if count_hotels < 1:
-        raise HTTPException(status_code=404, detail="Отель не найден")
-    if count_hotels > 1:
-        raise HTTPException(status_code=400, detail="Найдено несколько отелей")
     await db.hotels.edit(data, exclude_unset=True, id=hotel_id)
     await db.commit()
     return {"status": "OK"}

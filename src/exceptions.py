@@ -1,3 +1,6 @@
+from datetime import date
+
+from fastapi.exceptions import HTTPException
 
 
 class NabronirovalException(Exception):
@@ -10,5 +13,41 @@ class NabronirovalException(Exception):
 class ObjectNotFoundException(NabronirovalException):
     detail = "Объект не найден"
 
+
+class ObjectAlreadyExistsException(NabronirovalException):
+    detail = "Объект уже существует"
+
+
 class NotExistsFreeRoomsException(NabronirovalException):
-    detail = "Не осталось сободных номеров"
+    detail = "Не осталось свободных номеров"
+
+
+# class DateFromMoreThenDateToException(NabronirovalException):
+#     detail = "Дата заезда позже даты выезда"
+#
+#
+# class DateFromEqualDateToException(NabronirovalException):
+#     detail = "Дата заезда равна дате выезда"
+
+
+def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
+    if date_from >= date_to:
+        raise HTTPException(status_code=422, detail="Дата заезда не может быть позже даты выезда")
+
+
+class NabronirovalHTTPException(HTTPException):
+    status_code = 500
+    detail = None
+
+    def __init__(self):
+        super().__init__(status_code=self.status_code, detail=self.detail)
+
+
+class HotelNotFoundHTTPException(NabronirovalHTTPException):
+    status_code = 404
+    detail = "Отель не найден"
+
+
+class RoomNotFoundHTTPException(NabronirovalHTTPException):
+    status_code = 404
+    detail = "Номер не найден"
