@@ -1,5 +1,6 @@
 import asyncio
 import os
+import logging
 from time import sleep
 
 from PIL import Image
@@ -17,6 +18,7 @@ def test_task():
 
 @celery_instance.task
 def resize_image(image_path: str):
+    logging.info("Calling resize_image function")
     sizes = [1000, 500, 200]
     output_folder = "src/static/images/"
 
@@ -37,8 +39,7 @@ def resize_image(image_path: str):
 async def get_booking_with_today_checkin_helper():
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         booking = await db.bookings.get_bookings_with_today_checkin()
-        print(booking)
-
+        logging.debug(booking)
 
 @celery_instance.task(name="booking_today_checkin")
 def send_email_to_users_with_today_checking():

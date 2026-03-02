@@ -1,4 +1,5 @@
 import sys
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -20,11 +21,14 @@ from src.api.bookings import router as booking_router
 from src.api.facilities import router as facility_router
 from src.api.images import router as images_router
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
+    logging.info("FastAPI Cache initialized")
     yield
     await redis_manager.close()
 
