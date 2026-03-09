@@ -14,7 +14,6 @@ async def test_auth_flow(
     status_code,
     db,
     ac,
-    authenticated_ac,
 ):
     response_register = await ac.post(
         "/auth/register",

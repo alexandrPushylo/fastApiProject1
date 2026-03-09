@@ -8,8 +8,8 @@ mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda fn: f
 import pytest
 
 from src.api.dependencies import get_db
-from schemas.hotels import HotelAdd
-from schemas.rooms import RoomAdd
+from src.schemas.hotels import HotelAdd
+from src.schemas.rooms import RoomAdd
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.main import app
 from src.models import *

@@ -23,7 +23,7 @@ async def create_booking(db: DBDep, user_id: UserIdDep, data: BookingAddDto = Bo
     try:
         result = await db.bookings.add_booking(data=booking, hotel_id=hotel.id)
     except NotExistsFreeRoomsException as ex:
-        HTTPException(status_code=409, detail=ex.detail)
+        raise HTTPException(status_code=409, detail=ex.detail)
     await db.commit()
     return {"status": "OK", "data": result}
 
