@@ -5,12 +5,13 @@ from passlib.context import CryptContext
 import jwt
 
 from src.config import settings
+from src.services.base import BaseService
 
 
-class AuthService:
+class AuthService(BaseService):
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def veryfy_password(self, plain_password, hashed_password):
+    def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def create_access_token(self, data: dict) -> str:
