@@ -1,18 +1,17 @@
 from datetime import date
 
-from src.exceptions import check_date_to_after_date_from
-from src.schemas.hotels import HotelAdd, HotelPatch
+from src.exceptions import (
+    check_date_to_after_date_from,
+    ObjectNotFoundException,
+    HotelNotFoundException,
+)
+from src.schemas.hotels import HotelAdd, HotelPatch, Hotel
 from src.services.base import BaseService
 
 
-class HotelsService(BaseService):
+class HotelService(BaseService):
     async def get_filtered_by_time(
-            self,
-            pagination,
-            location: str | None,
-            title: str | None,
-            date_from: date,
-            date_to: date
+        self, pagination, location: str | None, title: str | None, date_from: date, date_to: date
     ):
         check_date_to_after_date_from(date_from, date_to)
         limit = pagination.per_page
@@ -39,10 +38,19 @@ class HotelsService(BaseService):
         await self.db.hotels.edit(data=data, id=hotel_id)
         await self.db.commit()
 
-    async def edit_hotel_partially(self, hotel_id: int, data: HotelPatch, exclude_unset: bool = False):
+    async def edit_hotel_partially(
+        self, hotel_id: int, data: HotelPatch, exclude_unset: bool = False
+    ):
         await self.db.hotels.edit(data=data, exclude_unset=exclude_unset, id=hotel_id)
         await self.db.commit()
 
     async def delete_hotel(self, hotel_id: int):
         await self.db.hotels.delete(id=hotel_id)
         await self.db.commit()
+
+    async def get_hotel_with_check(self, hotel_id: int) -> Hotel:
+        try:
+            return await self.db.hotels.get_one(id=hotel_id)
+        except ObjectNotFoundException as e:
+            raise HotelNotFoundException from e
+

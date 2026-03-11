@@ -11,7 +11,7 @@ from src.exceptions import (
     HotelNotFoundHTTPException
 )
 from src.schemas.hotels import HotelPatch, HotelAdd
-from src.services.hotels import HotelsService
+from src.services.hotels import HotelService
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("/{hotel_id}", summary="Получить отель")
 async def get_hotel(db: DBDep, hotel_id: int):
     try:
-        result = await HotelsService(db).get_hotel(hotel_id)
+        result = await HotelService(db).get_hotel(hotel_id)
     except ObjectNotFoundException:
         raise HotelNotFoundHTTPException
     return result
@@ -35,7 +35,7 @@ async def get_hotels(
     date_from: date = Query(examples=["2025-01-01"]),
     date_to: date = Query(examples=["2025-02-01"]),
 ):
-    return await HotelsService(db).get_filtered_by_time(
+    return await HotelService(db).get_filtered_by_time(
         pagination=pagination, date_from=date_from, date_to=date_to, location=location, title=title
     )
 
@@ -62,7 +62,7 @@ async def create_hotel(
         }
     ),
 ):
-    hotel = await HotelsService(db).add_hotel(data)
+    hotel = await HotelService(db).add_hotel(data)
     return {"status": "OK", "data": hotel}
 
 
@@ -71,7 +71,7 @@ async def delete_hotel(
     db: DBDep,
     hotel_id: int,
 ):
-    await HotelsService(db).delete_hotel(hotel_id)
+    await HotelService(db).delete_hotel(hotel_id)
     return {"status": "OK"}
 
 
@@ -81,11 +81,11 @@ async def update_hotel(
     hotel_id: int,
     data: HotelAdd,
 ):
-    await HotelsService(db).edit_hotel(hotel_id, data)
+    await HotelService(db).edit_hotel(hotel_id, data)
     return {"status": "OK"}
 
 
 @router.patch("/{hotel_id}", summary="Частично обновить отель")
 async def patch_hotel(db: DBDep, hotel_id: int, data: HotelPatch):
-    await HotelsService(db).edit_hotel_partially(hotel_id, data, exclude_unset=True)
+    await HotelService(db).edit_hotel_partially(hotel_id, data, exclude_unset=True)
     return {"status": "OK"}
