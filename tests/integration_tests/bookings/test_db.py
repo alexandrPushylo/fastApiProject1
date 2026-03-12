@@ -1,6 +1,6 @@
 import datetime
 
-from schemas.bookings import BookingAdd
+from src.schemas.bookings import BookingAdd
 
 
 async def test_add_crud(db):
