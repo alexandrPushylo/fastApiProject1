@@ -7,7 +7,7 @@ from src.schemas.bookings import BookingAdd
 from src.models.bookings import BookingsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper
-from src.exceptions import NotExistsFreeRoomsException
+from src.exceptions import AllRoomsAreBookedException
 
 
 class BookingsRepository(BaseRepository):
@@ -27,4 +27,4 @@ class BookingsRepository(BaseRepository):
 
         if data.room_id in rooms_ids:
             return await self.add(data)
-        raise NotExistsFreeRoomsException
+        raise AllRoomsAreBookedException

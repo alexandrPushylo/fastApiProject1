@@ -9,3 +9,6 @@ class FacilityService(BaseService):
         await self.db.commit()
         test_task.delay()
         return facility
+
+    async def get_facility(self):
+        return await self.db.facilities.get_all()

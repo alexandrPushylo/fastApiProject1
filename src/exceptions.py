@@ -26,7 +26,7 @@ class ObjectAlreadyExistsException(RentBaseException):
     detail = "Объект уже существует"
 
 
-class NotExistsFreeRoomsException(RentBaseException):
+class AllRoomsAreBookedException(RentBaseException):
     detail = "Не осталось свободных номеров"
 
 

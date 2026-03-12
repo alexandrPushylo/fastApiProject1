@@ -18,7 +18,7 @@ router = APIRouter(prefix="/hotels", tags=["Номера"])
 @router.get("/{hotel_id}/rooms/{room_id}", summary="Получить номер отеля")
 async def get_room(db: DBDep, hotel_id: int, room_id: int):
     try:
-        result = await db.rooms.get_one_with_rels(hotel_id=hotel_id, id=room_id)
+        result = await RoomService(db).get_room(hotel_id=hotel_id, room_id=room_id)
     except RoomNotFoundException:
         raise RoomNotFoundHTTPException
     return result
