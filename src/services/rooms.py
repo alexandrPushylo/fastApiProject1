@@ -31,10 +31,13 @@ class RoomService(BaseService):
         _room_date = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
         room: Room = await self.db.rooms.add(_room_date)
 
-        _rooms_facilities_data = [
+        rooms_facilities_data = [
             RoomFacilitiesAdd(room_id=room.id, facility_id=f_id)
             for f_id in room_data.facilities_ids
         ]
+
+        if rooms_facilities_data:
+            await self.db.rooms_facilities.add_bulk(rooms_facilities_data)
         await self.db.commit()
 
     async def edit_room(self, room_id: int, hotel_id: int, room_data: RoomAddDto):
