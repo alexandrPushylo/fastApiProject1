@@ -21,7 +21,7 @@ from src.api.bookings import router as booking_router
 from src.api.facilities import router as facility_router
 from src.api.images import router as images_router
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 @asynccontextmanager
@@ -42,4 +42,4 @@ app.include_router(facility_router)
 app.include_router(images_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", reload=True)
