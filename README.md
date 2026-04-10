@@ -3,12 +3,12 @@ docker network create myNetwork
 
 docker run --name booking_db \
     -p 6432:5432 \
-    -e POSTGRES_USER=abcde \
-    -e POSTGRES_PASSWORD=abcde \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_PASSWORD=postgres \
     -e POSTGRES_DB=booking \
     --network=myNetwork \
-    --volume pg-booking-data:/var/lib/postgresql/data \
-    -d postgres:16
+    --volume pg-booking-data:/var/lib/postgresql \
+    -d postgres:18
 
 docker run --name booking_cache \
     -p 7379:6379 \
